@@ -31,9 +31,6 @@ class Vivant{
     int pv_max;
 
     public:
-    // Mouton getMouton(){return mouton;}
-    // Loup getLoup(){return Loup;}
-
     void deplacement(char const *direction) {
         if (direction == N){
             col += 1;
@@ -64,8 +61,6 @@ class Vivant{
             row -= 1;
         }
     }
-
-
 };
 
 class Nonvivant{
@@ -79,7 +74,8 @@ class Case{
     protected:
     int row;
     int col;
-    char type;
+    char type_vi;
+    char type_nvi;
     Vivant* vi;
     Nonvivant* nvi;
     public:
@@ -87,12 +83,14 @@ class Case{
     // Case(int row, int col, char type) : row(row), col(col), type(type) {}
     int getRow(){return row;}
     int getCol(){return col;}
-    char getType(){return type;}
+    char getTypeVi(){return type_vi;}
+    char getTypeNvi(){return type_nvi;}
     Vivant* getVivant(){return vi;}
     Nonvivant* getNonvivant(){return nvi;}
     void setRow(int newRow){row = newRow;}
     void setCol(int newCol){col = newCol;}
-    void setType(char newType){type = newType;}
+    void setTypeVi(char newType){type_vi = newType;}
+    void setTypeNvi(char newType){type_nvi = newType;}
     void setVi(Vivant* newVi){vi = newVi;}
     void setNvi(Nonvivant* newNvi){nvi = newNvi;}
 };
@@ -144,24 +142,24 @@ int main(){
     for(int m = 0; m < 20; m++) {
         int i = rand() % row; 
         int j = rand() % col;
-        while(tab[i][j].getType() != 'H') {
+        while(tab[i][j].getTypeNvi() != 'H' || tab[i][j].getTypeVi() == 'M') {
             i = rand() % row; 
             j = rand() % col;
         }
         tabmouton[m] = new Mouton(i, j);
-        tab[i][j].setType(tabmouton[m]->getType());
+        tab[i][j].setTypeVi(tabmouton[m]->getType());
     }
 
     Loup* tabLoup[10];
     for(int l = 0; l < 10; l++) {
         int i = rand() % row; 
         int j = rand() % col;
-        while(tab[i][j].getType() != 'H') {
+        while(tab[i][j].getTypeNvi() != 'H' || tab[i][j].getTypeVi() == 'L') {
             i = rand() % row; 
             j = rand() % col;
         }
         tabLoup[l] = new Loup(i, j);
-        tab[i][j].setType(tabLoup[l]->getType());
+        tab[i][j].setTypeVi(tabLoup[l]->getType());
     }
 
     print_plateau(col, row, tab);
@@ -187,14 +185,32 @@ void print_plateau(int m, int n, Case tab[][NBR]){
                 cout << "|";
             }
             else if(i%2 == 0){
-                if ( tab[j][temp].getType() == 'H'){
-                    cout << "\033[32m" << tab[j][temp].getType() << "\033[0m";
+                if ( tab[j][temp].getTypeVi() == 'M'){
+                    cout << "\033[0m" << tab[j][temp].getTypeVi() << "\033[0m";
                 }
-                else if ( tab[j][temp].getType() == 'L'){
-                    cout << "\033[31m" << tab[j][temp].getType() << "\033[0m";
+                else if ( tab[j][temp].getTypeVi() == 'L'){
+                    cout << "\033[31m" << tab[j][temp].getTypeVi() << "\033[0m";
                 }
                 else{
-                    cout << tab[j][temp].getType();
+                    cout << tab[j][temp].getTypeVi();
+                }
+                temp++;
+            }
+            else{
+                cout << " ";
+            }
+        }
+        cout << endl;
+        temp = 0;
+        for (int i = 0; i < (4*m)+1; i++)
+        {    
+            if (i%4 == 0)
+            {
+                cout << "|";
+            }
+            else if(i%2 == 0){
+                if ( tab[j][temp].getTypeNvi() == 'H'){
+                    cout << "\033[32m" << tab[j][temp].getTypeNvi() << "\033[0m";
                 }
                 temp++;
             }
@@ -219,10 +235,8 @@ void initialisation(Case tab[][NBR], int col, int row){
         {   
             tab[i][j].setRow(j);
             tab[i][j].setCol(i);
-            tab[i][j].setType('H');
+            tab[i][j].setTypeNvi('H');
+            tab[i][j].setTypeVi(' ');
         }
     }
 }
-
-
-
