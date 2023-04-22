@@ -132,8 +132,8 @@ void initialisation(Case tab[][NBR], int col, int row);
 int main(){
     srand(time(NULL));
 
-    int col = 20;
-    int row = 20;
+    int col = 10;
+    int row = 10;
     Case tab[NBR][NBR];
     initialisation(tab, col, row);
     // print_plateau(col, row, tab);
