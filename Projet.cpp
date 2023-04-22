@@ -128,6 +128,7 @@ class Loup : public Vivant {
 
 void print_plateau(int m, int n, Case tab[][NBR]);
 void initialisation(Case tab[][NBR], int col, int row);
+void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NBR]);
 
 int main(){
     srand(time(NULL));
@@ -239,4 +240,14 @@ void initialisation(Case tab[][NBR], int col, int row){
             tab[i][j].setTypeVi(' ');
         }
     }
+}
+
+void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NBR]){
+    // for(int a = 0; a < NBR; a++) {
+        // moutons[a].choisir_action();
+        // loups[a].choisir_action();
+        
+        // faire une surcharge avec chaque objet la exemple avec les moutons
+        // tab[moutons[a].getRow()][moutons[a].getCol()].update_tab(moutons); 
+    // }
 }
