@@ -99,7 +99,7 @@ class Vivant : public Case{
             new_col--;
         }
         // Vérification des limites de la grille
-        if (new_row >= 0 && new_row < NBR && new_col >= 0 && new_col < NBR) {
+        if (new_row >= 0 && new_row < _row && new_col >= 0 && new_col < _col) {
             // Déplacement si la case est libre
             if (tab[new_row][new_col].getVivant() == nullptr) {
                 tab[row][col].setVi(nullptr);
@@ -188,6 +188,34 @@ class Loup : public Vivant {
     int getCol() {return col;}
     int getRow() {return row;}
     char getType(){return type;}
+    void deplacement(){
+        int temp = rand() % 8;
+        if (temp == 0)
+        {
+            Vivant::deplacement(N,type);
+        }
+        else if (temp == 1){
+            Vivant::deplacement(NE,type);
+        }
+        else if (temp == 2){
+            Vivant::deplacement(NO,type);
+        }
+        else if (temp == 3){
+            Vivant::deplacement(O,type);
+        }
+        else if (temp == 4){
+            Vivant::deplacement(E,type);
+        }
+        else if (temp == 5){
+            Vivant::deplacement(SE,type);
+        }
+        else if (temp == 6){
+            Vivant::deplacement(SO,type);
+        }
+        else if (temp == 7){
+            Vivant::deplacement(S,type);
+        }
+    }
 };
 
 
@@ -240,6 +268,7 @@ void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups);
 void genMouton(Mouton* tabmouton[NBR], int nbr_moutons);
 void genLoup(Loup* tabloup[NBR], int nbr_Loups);
 void tourMouton(Mouton* moutons[NBR], int nbr_moutons);
+void tourLoup(Loup* loups[NBR], int nbr_loups);
 
 int main(){
     srand(time(NULL));
@@ -259,10 +288,6 @@ int main(){
 
     print_plateau(nbr_tours, nbr_moutons, nbr_loups);
 
-    tourMouton(tabMouton, nbr_moutons);
-
-    print_plateau(nbr_tours, nbr_moutons, nbr_loups);
-    /*
     bool game = true;
     while(game == true){
         char user;
@@ -270,14 +295,18 @@ int main(){
         cin >> user;
         if(user == 'n'){
             game = false;
+            break;
         }
 
+        tourMouton(tabMouton, nbr_moutons);
+        tourLoup(tabloup, nbr_loups);
+        nbr_tours++; 
+        print_plateau(nbr_tours, nbr_moutons, nbr_loups);
         if (nbr_loups == 0 && nbr_moutons == 0){
             game = false;
         }
         
     }
-    */
     return 0;
 }
 
@@ -334,6 +363,11 @@ void genLoup(Loup* tabloup[NBR], int nbr_Loups){
 void tourMouton(Mouton* moutons[NBR], int nbr_moutons){
     for(int a = 0; a < nbr_moutons; a++) {
         moutons[a]->deplacement();
+    }
+}
+void tourLoup(Loup* loups[NBR], int nbr_loups){
+    for(int a = 0; a < nbr_loups; a++) {
+        loups[a]->deplacement();
     }
 }
 
