@@ -357,3 +357,5 @@ void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NB
         // tab[moutons[a].getRow()][moutons[a].getCol()].update_tab(moutons); 
     // }
 }
+
+// je suis un bot
