@@ -67,7 +67,7 @@ class Vivant : public Case{
     char type;
 
     public:
-    void deplacement(int direction) {
+    void deplacement(int direction,char type) {
         int new_row = row;
         int new_col = col;
         if (direction == N){
@@ -103,7 +103,9 @@ class Vivant : public Case{
             // Déplacement si la case est libre
             if (tab[new_row][new_col].getVivant() == nullptr) {
                 tab[row][col].setVi(nullptr);
+                tab[row][col].setTypeVi(' ');
                 tab[new_row][new_col].setVi(this);
+                tab[new_row][new_col].setTypeVi(type);
                 row = new_row;
                 col = new_col;
             }
@@ -137,28 +139,28 @@ class Mouton : public Vivant {
         int temp = rand() % 8;
         if (temp == 0)
         {
-            Vivant::deplacement(N);
+            Vivant::deplacement(N,type);
         }
         else if (temp == 1){
-            Vivant::deplacement(NE);
+            Vivant::deplacement(NE,type);
         }
         else if (temp == 2){
-            Vivant::deplacement(NO);
+            Vivant::deplacement(NO,type);
         }
         else if (temp == 3){
-            Vivant::deplacement(O);
+            Vivant::deplacement(O,type);
         }
         else if (temp == 4){
-            Vivant::deplacement(E);
+            Vivant::deplacement(E,type);
         }
         else if (temp == 5){
-            Vivant::deplacement(SE);
+            Vivant::deplacement(SE,type);
         }
         else if (temp == 6){
-            Vivant::deplacement(SO);
+            Vivant::deplacement(SO,type);
         }
         else if (temp == 7){
-            Vivant::deplacement(S);
+            Vivant::deplacement(S,type);
         }
     }
 };
