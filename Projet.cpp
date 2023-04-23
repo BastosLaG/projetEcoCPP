@@ -6,14 +6,17 @@
 #define NBR 100
 
 // Point cardinaut
-#define N "N"
-#define NE "NE"
-#define E "E"
-#define SE "SE"
-#define S "S"
-#define SO "SO"
-#define O "O"
-#define NO "NO"
+#define N 0
+#define NE 1
+#define E 2
+#define SE 3
+#define S 4
+#define SO 5
+#define O 6
+#define NO 7
+
+static int _row;
+static int _col;
 
 // il nous faut un plateau de m*n cases avec de l'herbe sur chaque cases et le nbr des mouton et des loups sont parametrable par le joueur
 
@@ -23,7 +26,39 @@
 
 using namespace std;
 
-class Vivant{
+class Case;
+class Vivant;
+class Mouton;
+class Loup;
+class NonVivant;
+
+
+class Case{
+    protected:
+    int row;
+    int col;
+    char type_vi;
+    char type_nvi;
+    Vivant* vi;
+    NonVivant* nvi;
+    public:
+    Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {}
+    int getRow(){return row;}
+    int getCol(){return col;}
+    char getTypeVi(){return type_vi;}
+    char getTypeNvi(){return type_nvi;}
+    Vivant* getVivant(){return vi;}
+    NonVivant* getNonVivant(){return nvi;}
+    void setRow(int newRow){row = newRow;}
+    void setCol(int newCol){col = newCol;}
+    void setTypeVi(char newType){type_vi = newType;}
+    void setTypeNvi(char newType){type_nvi = newType;}
+    void setVi(Vivant* newVi){vi = newVi;}
+    void setNvi(NonVivant* newNvi){nvi = newNvi;}
+};
+static Case tab[NBR][NBR];
+
+class Vivant : public Case{
     protected:
     int row;
     int col;
@@ -32,34 +67,46 @@ class Vivant{
     char type;
 
     public:
-    void deplacement(char const *direction) {
+    void deplacement(int direction) {
+        int new_row = row;
+        int new_col = col;
         if (direction == N){
-            col += 1;
+            new_row--;
         }
         else if (direction == NE){
-            col += 1;
-            row += 1;
-        }
-        else if (direction == NO){
-            col += 1;
-            row -= 1;
-        }
-        else if (direction == S){
-            col -= 1;
-        }
-        else if (direction == SE){
-            col -= 1;
-            row += 1;
-        }
-        else if (direction == SO){
-            col -= 1;
-            row -= 1;
+            new_row--;
+            new_col++;
         }
         else if (direction == E){
-            row += 1;
+            new_col++;
+        }
+        else if (direction == SE){
+            new_row++;
+            new_col++;
+        }
+        else if (direction == S){
+            new_row++;
+        }
+        else if (direction == SO){
+            new_row++;
+            new_col--;
         }
         else if (direction == O){
-            row -= 1;
+            new_col--;
+        }
+        else if (direction == NO){
+            new_row--;
+            new_col--;
+        }
+        // Vérification des limites de la grille
+        if (new_row >= 0 && new_row < NBR && new_col >= 0 && new_col < NBR) {
+            // Déplacement si la case est libre
+            if (tab[new_row][new_col].getVivant() == nullptr) {
+                tab[row][col].setVi(nullptr);
+                tab[new_row][new_col].setVi(this);
+                row = new_row;
+                col = new_col;
+            }
         }
     }
 };
@@ -83,10 +130,40 @@ class Mouton : public Vivant {
     }
     void setCol(int col) {col = col;}
     void setRow(int row) {row = row;}
-    int getCol() {return col;}
-    int getRow() {return row;}
+    int getCol() {return Vivant::col;}
+    int getRow() {return Vivant::row;}
     char getType(){return type;}
+    void deplacement(){
+        int temp = rand() % 8;
+        if (temp == 0)
+        {
+            Vivant::deplacement(N);
+        }
+        else if (temp == 1){
+            Vivant::deplacement(NE);
+        }
+        else if (temp == 2){
+            Vivant::deplacement(NO);
+        }
+        else if (temp == 3){
+            Vivant::deplacement(O);
+        }
+        else if (temp == 4){
+            Vivant::deplacement(E);
+        }
+        else if (temp == 5){
+            Vivant::deplacement(SE);
+        }
+        else if (temp == 6){
+            Vivant::deplacement(SO);
+        }
+        else if (temp == 7){
+            Vivant::deplacement(S);
+        }
+    }
 };
+
+
 
 class Loup : public Vivant {
     protected:
@@ -112,14 +189,14 @@ class Loup : public Vivant {
 };
 
 
-class Nonvivant{
+class NonVivant : public Case{
     protected:
     int jour;
     int row;
     int col;
     char type;
     public:
-    Nonvivant(int jour, int row, int col):jour(jour), row(row), col(col) {
+    NonVivant(int jour, int row, int col):jour(jour), row(row), col(col) {
         if (jour <= 0)
         {
             type = 'H';
@@ -138,29 +215,6 @@ class Nonvivant{
 };
 
 
-class Case{
-    protected:
-    int row;
-    int col;
-    char type_vi;
-    char type_nvi;
-    Vivant* vi;
-    Nonvivant* nvi;
-    public:
-    Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {}
-    int getRow(){return row;}
-    int getCol(){return col;}
-    char getTypeVi(){return type_vi;}
-    char getTypeNvi(){return type_nvi;}
-    Vivant* getVivant(){return vi;}
-    Nonvivant* getNonvivant(){return nvi;}
-    void setRow(int newRow){row = newRow;}
-    void setCol(int newCol){col = newCol;}
-    void setTypeVi(char newType){type_vi = newType;}
-    void setTypeNvi(char newType){type_nvi = newType;}
-    void setVi(Vivant* newVi){vi = newVi;}
-    void setNvi(Nonvivant* newNvi){nvi = newNvi;}
-};
 
 
 
@@ -179,31 +233,33 @@ class Case{
 
 
 
-void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, Case tab[][NBR]);
-void initialisation(Case tab[][NBR], int col, int row);
-void genMouton(Mouton* tabmouton[NBR], int nbr_moutons, int row, int col, Case tab[][NBR]);
-void genLoup(Loup* tabloup[NBR], int nbr_Loups, int row, int col, Case tab[][NBR]);
-void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NBR]);
+void initialisation();
+void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups);
+void genMouton(Mouton* tabmouton[NBR], int nbr_moutons);
+void genLoup(Loup* tabloup[NBR], int nbr_Loups);
+void tourMouton(Mouton* moutons[NBR], int nbr_moutons);
 
 int main(){
     srand(time(NULL));
 
-    int col = 10;
-    int row = 10;
+    _col = 10;
+    _row = 10;
     int nbr_tours = 0;
     int nbr_moutons = 20;
     int nbr_loups = 10;
     
-    Case tab[NBR][NBR];
     Mouton* tabMouton[NBR];
     Loup* tabloup[NBR];
 
-    initialisation(tab, col, row);
-    genMouton(tabMouton, nbr_moutons, row, col, tab);
-    genLoup(tabloup, nbr_loups, row, col, tab);
+    initialisation();
+    genMouton(tabMouton, nbr_moutons);
+    genLoup(tabloup, nbr_loups);
 
-    print_plateau(col, row, nbr_tours, nbr_moutons, nbr_loups, tab);
+    print_plateau(nbr_tours, nbr_moutons, nbr_loups);
 
+    tourMouton(tabMouton, nbr_moutons);
+
+    print_plateau(nbr_tours, nbr_moutons, nbr_loups);
     /*
     bool game = true;
     while(game == true){
@@ -237,15 +293,15 @@ int main(){
 
 
 
-void genMouton(Mouton* tabmouton[NBR], int nbr_moutons, int row, int col, Case tab[][NBR]){
+void genMouton(Mouton* tabmouton[NBR], int nbr_moutons){
     for(int m = 0; m < nbr_moutons; m++) {
         // spawn aleatoire 
-        int i = rand() % row; 
-        int j = rand() % col;
+        int i = rand() % _row; 
+        int j = rand() % _col;
         // si est sur un animal choisir un autre spawn
         while(tab[i][j].getTypeVi() == 'M' || tab[i][j].getTypeVi() == 'L') {
-            i = rand() % row; 
-            j = rand() % col;
+            i = rand() % _row; 
+            j = rand() % _col;
         }
         // setter de mouton
         tabmouton[m] = new Mouton(i, j);
@@ -255,15 +311,15 @@ void genMouton(Mouton* tabmouton[NBR], int nbr_moutons, int row, int col, Case t
     }
 }
 
-void genLoup(Loup* tabloup[NBR], int nbr_Loups, int row, int col, Case tab[][NBR]){
+void genLoup(Loup* tabloup[NBR], int nbr_Loups){
     for(int l = 0; l < nbr_Loups; l++) {
         // spawn aleatoire 
-        int i = rand() % row; 
-        int j = rand() % col;
+        int i = rand() % _row; 
+        int j = rand() % _col;
         // si est sur un animal choisir un autre spawn
         while(tab[i][j].getTypeVi() == 'L' || tab[i][j].getTypeVi() == 'M') {
-            i = rand() % row; 
-            j = rand() % col;
+            i = rand() % _row; 
+            j = rand() % _col;
         }
         // setter de mouton
         tabloup[l] = new Loup(i, j);
@@ -273,17 +329,22 @@ void genLoup(Loup* tabloup[NBR], int nbr_Loups, int row, int col, Case tab[][NBR
     }
 }
 
+void tourMouton(Mouton* moutons[NBR], int nbr_moutons){
+    for(int a = 0; a < nbr_moutons; a++) {
+        moutons[a]->deplacement();
+    }
+}
 
-void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, Case tab[][NBR]){
+void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups){
     int temp = 0;
-    for (int j = 0; j < n; j++)
+    for (int j = 0; j < _row; j++)
     {
-        for (int i = 0; i < m; i++)
+        for (int i = 0; i < _col; i++)
         {
             cout << "+---";
         }
         cout << "+" << endl;
-        for (int i = 0; i < (4*m)+1; i++)
+        for (int i = 0; i < (4*_row)+1; i++)
         {    
             if (i%4 == 0)
             {
@@ -307,7 +368,7 @@ void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, 
         }
         cout << endl;
         temp = 0;
-        for (int i = 0; i < (4*m)+1; i++)
+        for (int i = 0; i < (4*_row)+1; i++)
         {    
             if (i%4 == 0)
             {
@@ -326,7 +387,7 @@ void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, 
         cout << endl;
         temp = 0;
     }
-    for (int i = 0; i < m; i++)
+    for (int i = 0; i < _row; i++)
     {
         cout << "+---";
     }
@@ -335,10 +396,10 @@ void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, 
     cout << "\nTours : " << nbr_tours << " | " << "Loups : " << nbr_loups << " | " << "Moutons : " << nbr_moutons << endl; 
 }
 
-void initialisation(Case tab[][NBR], int col, int row){
-    for (int i = 0; i < col; i++)
+void initialisation(){
+    for (int i = 0; i < _col; i++)
     {
-        for (int j = 0; j < row; j++)
+        for (int j = 0; j < _row; j++)
         {   
             tab[i][j].setRow(j);
             tab[i][j].setCol(i);
@@ -348,14 +409,3 @@ void initialisation(Case tab[][NBR], int col, int row){
     }
 }
 
-void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NBR]){
-    // for(int a = 0; a < NBR; a++) {
-        // moutons[a].choisir_action();
-        // loups[a].choisir_action();
-        
-        // faire une surcharge avec chaque objet la exemple avec les moutons
-        // tab[moutons[a].getRow()][moutons[a].getCol()].update_tab(moutons); 
-    // }
-}
-
-// je suis un bot
