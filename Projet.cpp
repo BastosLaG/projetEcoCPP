@@ -29,6 +29,7 @@ class Vivant{
     int col;
     int pv;
     int pv_max;
+    char type;
 
     public:
     void deplacement(char const *direction) {
@@ -63,12 +64,57 @@ class Vivant{
     }
 };
 
+
+class Mouton : public Vivant {
+    public:
+    Mouton(int row, int col){
+        Vivant::pv_max = 10;
+        Vivant::pv = pv_max;
+        Vivant::row = row;
+        Vivant::col = col;
+        Vivant::type = 'M';
+    }
+
+    char getType(){return type;}
+};
+
+class Loup : public Vivant {
+    public:
+    Loup(int row, int col){
+        Vivant::pv_max = 10;
+        Vivant::pv = pv_max;
+        Vivant::row = row;
+        Vivant::col = col;
+        Vivant::type = 'L';
+    }
+    char getType(){return type;}
+};
+
+
 class Nonvivant{
     protected:
     int jour;
-    int jour_max;
+    int row;
+    int col;
+    char type;
     public:
+    Nonvivant(int jour, int row, int col):jour(jour), row(row), col(col) {
+        if (jour == 0)
+        {
+            type = 'H';
+        }
+        else if (jour == 1){
+            type = 'S';
+        }
+    }
+
+    void transformation(){
+        if (type == 'S' && jour <= 0){
+            type = 'H';
+        }
+    }
 };
+
 
 class Case{
     protected:
@@ -95,34 +141,20 @@ class Case{
 };
 
 
-class Mouton : public Vivant {
-    protected:
-    char type = 'M';
 
-    public:
-    Mouton(int row, int col){
-        Vivant::pv_max = 10;
-        Vivant::pv = pv_max;
-        Vivant::row = row;
-        Vivant::col = col;
-    }
 
-    char getType(){return type;}
-};
 
-class Loup : public Vivant {
-    protected:
-    char type = 'L';
 
-    public:
-    Loup(int row, int col){
-        Vivant::pv_max = 10;
-        Vivant::pv = pv_max;
-        Vivant::row = row;
-        Vivant::col = col;
-    }
-    char getType(){return type;}
-};
+
+
+
+
+
+
+
+
+
+
 
 
 void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, Case tab[][NBR]);
@@ -144,9 +176,30 @@ int main(){
     print_plateau(col, row, nbr_tours, nbr_moutons, nbr_loups, tab);
 
     bool game = true;
-    while(game == true)
+    while(game == true){
+        
+    }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Mouton* genMouton(int nbr_moutons, int row, int col, Case tab[][NBR]){
     Mouton* tabmouton[nbr_moutons];
@@ -177,6 +230,7 @@ Loup* genLoup(int nbr_Loups, int row, int col, Case tab[][NBR]){
     }
     return *tabLoup;
 }
+
 
 void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, Case tab[][NBR]){
     int temp = 0;
