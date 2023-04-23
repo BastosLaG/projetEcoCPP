@@ -358,4 +358,3 @@ void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NB
     // }
 }
 
-// je suis un bot
