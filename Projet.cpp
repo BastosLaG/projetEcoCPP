@@ -80,7 +80,6 @@ class Case{
     Nonvivant* nvi;
     public:
     Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {}
-    // Case(int row, int col, char type) : row(row), col(col), type(type) {}
     int getRow(){return row;}
     int getCol(){return col;}
     char getTypeVi(){return type_vi;}
@@ -126,8 +125,8 @@ class Loup : public Vivant {
 };
 
 
-void print_plateau(int m, int n, Case tab[][NBR]);
-void initialisation(Case tab[][NBR], int col, int row);
+void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, Case tab[][NBR]);
+void initialisation(Case tab[][NBR], int col, int row, int nbr_loups, int nbr_moutons);
 void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NBR]);
 
 int main(){
@@ -135,12 +134,23 @@ int main(){
 
     int col = 10;
     int row = 10;
+    int nbr_tours = 0;
+    int nbr_moutons = 20;
+    int nbr_loups = 10;
     Case tab[NBR][NBR];
-    initialisation(tab, col, row);
+    initialisation(tab, col, row, nbr_loups, nbr_moutons);
     // print_plateau(col, row, tab);
 
-    Mouton* tabmouton[20];
-    for(int m = 0; m < 20; m++) {
+    print_plateau(col, row, nbr_tours, nbr_moutons, nbr_loups, tab);
+
+    bool game = true;
+    while(game == true)
+    return 0;
+}
+
+Mouton* genMouton(int nbr_moutons, int row, int col, Case tab[][NBR]){
+    Mouton* tabmouton[nbr_moutons];
+    for(int m = 0; m < nbr_moutons; m++) {
         int i = rand() % row; 
         int j = rand() % col;
         while(tab[i][j].getTypeNvi() != 'H' || tab[i][j].getTypeVi() == 'M') {
@@ -150,9 +160,12 @@ int main(){
         tabmouton[m] = new Mouton(i, j);
         tab[i][j].setTypeVi(tabmouton[m]->getType());
     }
+    return *tabmouton;
+}
 
-    Loup* tabLoup[10];
-    for(int l = 0; l < 10; l++) {
+Loup* genLoup(int nbr_Loups, int row, int col, Case tab[][NBR]){
+    Loup* tabLoup[nbr_Loups];
+    for(int l = 0; l < nbr_Loups; l++) {
         int i = rand() % row; 
         int j = rand() % col;
         while(tab[i][j].getTypeNvi() != 'H' || tab[i][j].getTypeVi() == 'L') {
@@ -162,15 +175,10 @@ int main(){
         tabLoup[l] = new Loup(i, j);
         tab[i][j].setTypeVi(tabLoup[l]->getType());
     }
-
-    print_plateau(col, row, tab);
-
-    bool game = true;
-    while(game == true)
-    return 0;
+    return *tabLoup;
 }
 
-void print_plateau(int m, int n, Case tab[][NBR]){
+void print_plateau(int m, int n, int nbr_tours, int nbr_moutons, int nbr_loups, Case tab[][NBR]){
     int temp = 0;
     for (int j = 0; j < n; j++)
     {
@@ -227,9 +235,11 @@ void print_plateau(int m, int n, Case tab[][NBR]){
         cout << "+---";
     }
     cout << "+" << endl;
+
+    cout << "\nTours : " << nbr_tours << " | " << "Loups : " << nbr_loups << " | " << "Moutons : " << nbr_moutons << endl; 
 }
 
-void initialisation(Case tab[][NBR], int col, int row){
+void initialisation(Case tab[][NBR], int col, int row, int nbr_loups, int nbr_moutons){
     for (int i = 0; i < col; i++)
     {
         for (int j = 0; j < row; j++)
@@ -240,6 +250,8 @@ void initialisation(Case tab[][NBR], int col, int row){
             tab[i][j].setTypeVi(' ');
         }
     }
+    genMouton(nbr_moutons, row, col, tab);
+    genLoup(nbr_loups, row, col, tab);
 }
 
 void tours(Case tab[][NBR], int row, int col, Mouton moutons[NBR], Loup loups[NBR]){
