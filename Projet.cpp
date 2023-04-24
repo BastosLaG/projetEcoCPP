@@ -39,10 +39,12 @@ class Case{
     int col;
     char type_vi;
     char type_nvi;
+    int nb_moutons; 
+
     Vivant* vi;
     NonVivant* nvi;
     public:
-    Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {}
+    Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {} 
     int getRow(){return row;}
     int getCol(){return col;}
     char getTypeVi(){return type_vi;}
@@ -65,6 +67,7 @@ class Vivant : public Case{
     int pv;
     int pv_max;
     char type;
+    int faim;
 
     public:
     void deplacement(int direction,char type) {
@@ -121,6 +124,7 @@ class Mouton : public Vivant {
     Mouton(){
         Vivant::pv_max = 10;
         Vivant::pv = pv_max;
+
         type = 'M';
     }
     Mouton(int row, int col){
@@ -163,7 +167,14 @@ class Mouton : public Vivant {
             Vivant::deplacement(S,type);
         }
     }
+    void mangerHerbe() {
+            if (tab[row][col].getTypeNvi() == 'H') {
+                tab[row][col].setNvi(nullptr);
+                tab[row][col].setTypeNvi(' ');
+            }
+        }
 };
+
 
 
 
@@ -216,6 +227,20 @@ class Loup : public Vivant {
             Vivant::deplacement(S,type);
         }
     }
+    void mangerMouton() {
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == 'M') {
+                    // Le loup mange le mouton
+                    tab[i][j].setVi(nullptr);
+                    tab[i][j].setTypeVi(' ');
+                    
+                    return;
+                }
+            }
+        }
+    }
+    
 };
 
 
@@ -243,7 +268,6 @@ class NonVivant : public Case{
         }
     }
 };
-
 
 
 
@@ -339,6 +363,7 @@ void genMouton(Mouton* tabmouton[NBR], int nbr_moutons){
         // change se qu'il y a dans la case
         tab[i][j].setTypeVi(tabmouton[m]->getType());
         tab[i][j].setVi(tabmouton[m]);
+    
     }
 }
 
@@ -363,13 +388,16 @@ void genLoup(Loup* tabloup[NBR], int nbr_Loups){
 void tourMouton(Mouton* moutons[NBR], int nbr_moutons){
     for(int a = 0; a < nbr_moutons; a++) {
         moutons[a]->deplacement();
+        moutons[a]->mangerHerbe();
     }
 }
 void tourLoup(Loup* loups[NBR], int nbr_loups){
     for(int a = 0; a < nbr_loups; a++) {
         loups[a]->deplacement();
+        loups[a]->mangerMouton();
     }
 }
+
 
 void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups){
     int temp = 0;
@@ -444,3 +472,4 @@ void initialisation(){
         }
     }
 }
+
