@@ -88,6 +88,7 @@ class Mouton : public Vivant {
     char getType(){return type;}
 };
 
+
 class Loup : public Vivant {
     protected:
     char type;
@@ -222,15 +223,6 @@ int main(){
     */
     return 0;
 }
-
-
-
-
-
-
-
-
-
 
 
 
