@@ -17,6 +17,8 @@
 
 static int _row;
 static int _col;
+static int _nbr_moutons = 20;
+static int _nbr_loups = 10;
 
 // il nous faut un plateau de m*n cases avec de l'herbe sur chaque cases et le nbr des mouton et des loups sont parametrable par le joueur
 
@@ -39,10 +41,12 @@ class Case{
     int col;
     char type_vi;
     char type_nvi;
+    int nb_moutons; 
+
     Vivant* vi;
     NonVivant* nvi;
     public:
-    Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {}
+    Case() : row(0), col(0), vi(nullptr), nvi(nullptr) {} 
     int getRow(){return row;}
     int getCol(){return col;}
     char getTypeVi(){return type_vi;}
@@ -65,6 +69,7 @@ class Vivant : public Case{
     int pv;
     int pv_max;
     char type;
+    int faim;
 
     public:
     void deplacement(int direction,char type) {
@@ -121,6 +126,7 @@ class Mouton : public Vivant {
     Mouton(){
         Vivant::pv_max = 10;
         Vivant::pv = pv_max;
+
         type = 'M';
     }
     Mouton(int row, int col){
@@ -163,7 +169,14 @@ class Mouton : public Vivant {
             Vivant::deplacement(S,type);
         }
     }
+    void mangerHerbe() {
+            if (tab[row][col].getTypeNvi() == 'H') {
+                tab[row][col].setNvi(nullptr);
+                tab[row][col].setTypeNvi(' ');
+            }
+        }
 };
+
 
 
 
@@ -216,6 +229,24 @@ class Loup : public Vivant {
             Vivant::deplacement(S,type);
         }
     }
+    void mangerMouton() {
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == 'M') {
+                    // Le loup mange le mouton
+                    tab[i][j].setVi(this);
+                    tab[i][j].setTypeVi(this->getType());
+                    tab[this->getRow()][this->getCol()].setVi(nullptr);
+                    tab[this->getRow()][this->getCol()].setTypeVi(' ');
+                    this->setRow(i);
+                    this->setCol(j);
+                    _nbr_moutons--;
+                    return;
+                }
+            }
+        }
+    }
+    
 };
 
 
@@ -262,13 +293,12 @@ class NonVivant : public Case{
 
 
 
-
 void initialisation();
-void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups);
-void genMouton(Mouton* tabmouton[NBR], int nbr_moutons);
-void genLoup(Loup* tabloup[NBR], int nbr_Loups);
-void tourMouton(Mouton* moutons[NBR], int nbr_moutons);
-void tourLoup(Loup* loups[NBR], int nbr_loups);
+void print_plateau(int nbr_tours, int _nbr_moutons, int _nbr_loups);
+void genMouton(Mouton* tabmouton[NBR], int _nbr_moutons);
+void genLoup(Loup* tabloup[NBR], int _nbr_loups);
+void tourMouton(Mouton* moutons[NBR], int _nbr_moutons);
+void tourLoup(Loup* loups[NBR], int _nbr_loups);
 
 int main(){
     srand(time(NULL));
@@ -276,17 +306,15 @@ int main(){
     _col = 10;
     _row = 10;
     int nbr_tours = 0;
-    int nbr_moutons = 20;
-    int nbr_loups = 10;
     
     Mouton* tabMouton[NBR];
     Loup* tabloup[NBR];
 
     initialisation();
-    genMouton(tabMouton, nbr_moutons);
-    genLoup(tabloup, nbr_loups);
+    genMouton(tabMouton, _nbr_moutons);
+    genLoup(tabloup, _nbr_loups);
 
-    print_plateau(nbr_tours, nbr_moutons, nbr_loups);
+    print_plateau(nbr_tours, _nbr_moutons, _nbr_loups);
 
     bool game = true;
     while(game == true){
@@ -298,11 +326,11 @@ int main(){
             break;
         }
 
-        tourMouton(tabMouton, nbr_moutons);
-        tourLoup(tabloup, nbr_loups);
+        tourMouton(tabMouton, _nbr_moutons);
+        tourLoup(tabloup, _nbr_loups);
         nbr_tours++; 
-        print_plateau(nbr_tours, nbr_moutons, nbr_loups);
-        if (nbr_loups == 0 && nbr_moutons == 0){
+        print_plateau(nbr_tours, _nbr_moutons, _nbr_loups);
+        if (_nbr_loups == 0 && _nbr_moutons == 0){
             game = false;
         }
         
@@ -324,8 +352,8 @@ int main(){
 
 
 
-void genMouton(Mouton* tabmouton[NBR], int nbr_moutons){
-    for(int m = 0; m < nbr_moutons; m++) {
+void genMouton(Mouton* tabmouton[NBR], int __nbr_moutons){
+    for(int m = 0; m < __nbr_moutons; m++) {
         // spawn aleatoire 
         int i = rand() % _row; 
         int j = rand() % _col;
@@ -339,11 +367,12 @@ void genMouton(Mouton* tabmouton[NBR], int nbr_moutons){
         // change se qu'il y a dans la case
         tab[i][j].setTypeVi(tabmouton[m]->getType());
         tab[i][j].setVi(tabmouton[m]);
+    
     }
 }
 
-void genLoup(Loup* tabloup[NBR], int nbr_Loups){
-    for(int l = 0; l < nbr_Loups; l++) {
+void genLoup(Loup* tabloup[NBR], int _nbr_loups){
+    for(int l = 0; l < _nbr_loups; l++) {
         // spawn aleatoire 
         int i = rand() % _row; 
         int j = rand() % _col;
@@ -360,18 +389,21 @@ void genLoup(Loup* tabloup[NBR], int nbr_Loups){
     }
 }
 
-void tourMouton(Mouton* moutons[NBR], int nbr_moutons){
-    for(int a = 0; a < nbr_moutons; a++) {
+void tourMouton(Mouton* moutons[NBR], int __nbr_moutons){
+    for(int a = 0; a < __nbr_moutons; a++) {
         moutons[a]->deplacement();
+        moutons[a]->mangerHerbe();
     }
 }
-void tourLoup(Loup* loups[NBR], int nbr_loups){
-    for(int a = 0; a < nbr_loups; a++) {
+void tourLoup(Loup* loups[NBR], int _nbr_loups){
+    for(int a = 0; a < _nbr_loups; a++) {
         loups[a]->deplacement();
+        loups[a]->mangerMouton();
     }
 }
 
-void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups){
+
+void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
     int temp = 0;
     for (int j = 0; j < _row; j++)
     {
@@ -414,6 +446,9 @@ void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups){
                 if ( tab[j][temp].getTypeNvi() == 'H'){
                     cout << "\033[32m" << tab[j][temp].getTypeNvi() << "\033[0m";
                 }
+                else if(tab[j][temp].getTypeNvi() == ' '){
+                    cout << tab[j][temp].getTypeNvi();
+                }   
                 temp++;
             }
             else{
@@ -429,7 +464,7 @@ void print_plateau(int nbr_tours, int nbr_moutons, int nbr_loups){
     }
     cout << "+" << endl;
 
-    cout << "\nTours : " << nbr_tours << " | " << "Loups : " << nbr_loups << " | " << "Moutons : " << nbr_moutons << endl; 
+    cout << "\nTours : " << nbr_tours << " | " << "Loups : " << _nbr_loups << " | " << "Moutons : " << __nbr_moutons << endl; 
 }
 
 void initialisation(){
