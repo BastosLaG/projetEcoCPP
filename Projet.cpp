@@ -234,7 +234,6 @@ class Loup : public Vivant {
                     // Le loup mange le mouton
                     tab[i][j].setVi(nullptr);
                     tab[i][j].setTypeVi(' ');
-                    
                     return;
                 }
             }
@@ -270,6 +269,32 @@ class NonVivant : public Case{
 };
 
 
+class Herbe : public NonVivant {
+    protected:
+    int quantite;
+
+    public:
+    Herbe(int quantite, int row, int col):quantite(quantite), NonVivant(0,row,col) {
+        type = 'h';
+    }
+
+    int getQuantite(){return quantite;}
+
+    void diminuerQuantite(){
+        if (quantite > 0)
+        {
+            //quantie
+        }
+        if (quantite == 0)
+        {
+            type = 'H';
+        }
+    }
+
+    void mangerHerbe(){
+        diminuerQuantite();
+    }
+};
 
 
 
