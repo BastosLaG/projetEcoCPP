@@ -212,7 +212,7 @@ class Mouton : public Vivant {
             Vivant::setFaim(Vivant::getFaimMax());
         }
     }
-    int lavidaloca(Mouton* tabu[NBR],int nbr_tabu){
+    int lavidaloca(Mouton* tabu[NBR]){
         pv--;
         faim--;
         if (faim == 0)
@@ -221,12 +221,12 @@ class Mouton : public Vivant {
             tab[row][col].setVi(nullptr);
             tab[row][col].setTypeVi(' ');
             tab[row][col].setTypeNvi('S');
-            for (int i = rang; i < nbr_tabu-1; i++)
+            for (int i = rang; i < _nbr_moutons-1; i++)
             {
                 tabu[i] = tabu[i+1];
                 tabu[i]->setRang(i);
             }
-            nbr_tabu--;
+            _nbr_moutons--;
             return 0;
         }
         else if (pv == 0){
@@ -234,25 +234,27 @@ class Mouton : public Vivant {
             tab[row][col].setVi(nullptr);
             tab[row][col].setTypeVi(' ');
             tab[row][col].setTypeNvi('S');
-            for (int i = rang; i < nbr_tabu-1; i++)
+            for (int i = rang; i < _nbr_moutons-1; i++)
             {
                 tabu[i] = tabu[i+1];
                 tabu[i]->setRang(i);
             }
-            nbr_tabu--;
+            _nbr_moutons--;
             return 0;
         }
         return 1;
     }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
 class Loup : public Vivant {
     public:
     Loup(int row, int col, int rang){
         Vivant::pv_max = 10;
         Vivant::pv = pv_max;
-        Vivant::faim_max = 10;
-        Vivant::faim = 10;
+        Vivant::faim_max = 5;
+        Vivant::faim = 5;
         Vivant::row = row;
         Vivant::col = col;
         Vivant::rang = rang;
@@ -268,8 +270,10 @@ class Loup : public Vivant {
                 if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == 'M') {
                     // Le loup mange le mouton
                     Vivant::setFaim(Vivant::getFaimMax());
-                    for (int k = tab[i][j].getVivant()->getRang(); k < _nbr_moutons; k++){
-                        tabMouton[rang] = tabMouton[rang+1];
+                    for (int k = tab[i][j].getVivant()->getRang(); k < _nbr_moutons-1; k++)
+                    {
+                        tabMouton[k] = tabMouton[k+1];
+                        tabMouton[k]->setRang(k);
                     }
                     tab[this->getRow()][this->getCol()].setVi(nullptr);
                     tab[this->getRow()][this->getCol()].setTypeVi(' ');
@@ -284,7 +288,7 @@ class Loup : public Vivant {
             }
         }
     }
-    int lavidaloca(Loup* tabu[NBR],int nbr_tabu){
+    int lavidaloca(Loup* tabu[NBR]){
         pv--;
         faim--;
         if (faim == 0)
@@ -293,12 +297,12 @@ class Loup : public Vivant {
             tab[row][col].setVi(nullptr);
             tab[row][col].setTypeVi(' ');
             tab[row][col].setTypeNvi('S');
-            for (int i = rang; i < nbr_tabu-1; i++)
+            for (int i = rang; i < _nbr_loups-1; i++)
             {
                 tabu[i] = tabu[i+1];
                 tabu[i]->setRang(i);
             }
-            nbr_tabu--;
+            _nbr_loups--;
             return 0;
         }
         else if (pv == 0){
@@ -306,12 +310,12 @@ class Loup : public Vivant {
             tab[row][col].setVi(nullptr);
             tab[row][col].setTypeVi(' ');
             tab[row][col].setTypeNvi('S');
-            for (int i = rang; i < nbr_tabu-1; i++)
+            for (int i = rang; i < _nbr_loups-1; i++)
             {
                 tabu[i] = tabu[i+1];
                 tabu[i]->setRang(i);
             }
-            nbr_tabu--;
+            _nbr_loups--;
             return 0;
         }
         return 1;
@@ -352,6 +356,16 @@ int main(){
             break;
         }
 
+        //remet de l'herbe sale chien
+        for (int i = 0; i < _row; i++)
+        {
+            for (int j = 0; j < _col; j++){
+                if (tab[i][j].getTypeNvi() == 'S'){
+                    tab[i][j].setTypeNvi('H');
+                }
+            }
+        }
+        
         tourMouton(tabMouton, _nbr_moutons);
         tourLoup(tabloup, _nbr_loups);
         nbr_tours++; 
@@ -411,14 +425,10 @@ void tourMouton(Mouton* moutons[NBR], int _nbr_moutons){
     int temp = 0;
     for(int a = 0; a < _nbr_moutons; a++) {
         temp = rand() % 2;
-        if (moutons[a]->lavidaloca(tabMouton, _nbr_moutons) == 0)
-        {
-            cout << "hello" << endl;
-            moutons[a]->lavidaloca(moutons, _nbr_moutons);
-            return;
+        if (moutons[a]->lavidaloca(tabMouton) == 0){
+            continue;
         }
         else{
-            moutons[a]->lavidaloca(moutons, _nbr_moutons);
             if(temp == 0) {
                 moutons[a]->deplacement();
             }
@@ -432,12 +442,10 @@ void tourLoup(Loup* loups[NBR], int _nbr_loups){
     int temp = 0;
     for(int a = 0; a < _nbr_loups; a++) {
         temp = rand() % 2;
-        if (loups[a]->lavidaloca(loups, _nbr_loups) == 0)
-        {
-            loups[a]->lavidaloca(loups, _nbr_loups);
+        if (loups[a]->lavidaloca(loups) == 0){
+            continue;
         }
         else{
-            loups[a]->lavidaloca(loups, _nbr_loups);
             if(temp == 0) {
                 loups[a]->deplacement();
             }
@@ -469,11 +477,13 @@ void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
     int temp = 0;
     for (int j = 0; j < _row; j++)
     {
+        // print ligne de separation de row
         for (int i = 0; i < _col; i++)
         {
             cout << "+---";
         }
         cout << "+" << endl;
+        // print des cases de type Vivant
         for (int i = 0; i < (4*_row)+1; i++)
         {    
             if (i%4 == 0)
@@ -487,8 +497,8 @@ void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
                 else if ( tab[j][temp].getTypeVi() == 'L'){
                     cout << "\033[31m" << tab[j][temp].getTypeVi() << "\033[0m";
                 }
-                else{
-                    cout << tab[j][temp].getTypeVi();
+                else if ( tab[j][temp].getTypeVi() == ' '){
+                    cout << ' ';
                 }
                 temp++;
             }
@@ -498,6 +508,7 @@ void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
         }
         cout << endl;
         temp = 0;
+        // print des cases de type NonVivant
         for (int i = 0; i < (4*_row)+1; i++)
         {    
             if (i%4 == 0)
@@ -509,7 +520,7 @@ void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
                     cout << "\033[32m" << tab[j][temp].getTypeNvi() << "\033[0m";
                 }
                 else if (tab[j][temp].getTypeNvi() == 'S'){
-                    cout << tab[j][temp].getTypeNvi();
+                    cout << "\033[35m" << tab[j][temp].getTypeNvi() << "\033[0m";
                 }
                 else if(tab[j][temp].getTypeNvi() == ' '){
                     cout << tab[j][temp].getTypeNvi();
@@ -523,11 +534,14 @@ void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
         cout << endl;
         temp = 0;
     }
+
+    // print derniere ligne
     for (int i = 0; i < _row; i++)
     {
         cout << "+---";
     }
     cout << "+" << endl;
 
-    cout << "\nTours : " << nbr_tours << " | " << "Loups : " << _nbr_loups << " | " << "Moutons : " << __nbr_moutons << endl; 
+    // print scorboards 
+    cout << "\nTours : " << nbr_tours << " | " << "Loups : " << _nbr_loups << " | " << "Moutons : " << _nbr_moutons << endl; 
 }
