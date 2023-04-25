@@ -18,7 +18,7 @@
 static int _row;
 static int _col;
 static int _nbr_moutons = 20;
-static int _nbr_loups = 10;
+static int _nbr_loups = 20;
 
 // il nous faut un plateau de m*n cases avec de l'herbe sur chaque cases et le nbr des mouton et des loups sont parametrable par le joueur
 
@@ -113,7 +113,9 @@ class Vivant : public Case{
     int pv; // longévité
     int faim_max; // faim
     int faim; // faim
+    int sexe;
     char type;
+
 
 
     public:
@@ -124,6 +126,7 @@ class Vivant : public Case{
     int getPv(){return pv;}
     int getFaim(){return faim;}
     int getFaimMax(){return faim_max;}
+    int getSexe(){return sexe;}
     char getType(){return type;}
 
     void setRow(int new_row) {row = new_row;}
@@ -131,6 +134,7 @@ class Vivant : public Case{
     void setRang(int new_rang) {rang = new_rang;}
     void setPv(int new_pv) {pv = new_pv;}
     void setFaim(int faim_restor){faim = faim_restor;}
+    void setSexe(int new_sexe){sexe = new_sexe;}
     void setType(char new_type) {type = new_type;}
 
 
@@ -184,13 +188,14 @@ class Vivant : public Case{
             }
         }
     }
+    virtual void ken() = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 class Mouton : public Vivant {
     public:
-    Mouton(int row, int col, int rang){
+    Mouton(int row, int col, int rang, int sexe){
         Vivant::pv_max = 10;
         Vivant::pv = pv_max;
         Vivant::faim_max = 5;
@@ -198,6 +203,7 @@ class Mouton : public Vivant {
         Vivant::row = row;
         Vivant::col = col;
         Vivant::rang = rang;
+        Vivant::sexe = sexe;
         Vivant::type = 'M';
     }
     void deplacement(){
@@ -244,13 +250,46 @@ class Mouton : public Vivant {
         }
         return 1;
     }
+    void ken(){
+        if (sexe == 0){
+            // on fait des bb
+            for (int i = row - 1; i <= row + 1; i++) {
+                for (int j = col - 1; j <= col + 1; j++) {
+                    if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
+                        // Le loup a trouver son ame soeur
+                        for(int k=row-1 ; k<row+1; k++){
+                            for(int a= col-1; a<col+1; a++){
+                                for(int b= tab[i][j].getVivant()->getRow()-1; b<tab[i][j].getVivant()->getRow()+1; b++){
+                                    for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
+                                        // On est sur la meme case
+                                        if (k == b && a == o){
+                                            // Est vide ?
+                                            if (tab[k][a].getTypeVi() == ' '){
+                                                // creer BB
+                                                tabMouton[_nbr_moutons] = new Mouton(k,a,_nbr_moutons, rand()%2);
+                                                tab[k][a].setVi(tabMouton[_nbr_moutons]);
+                                                tab[k][a].setTypeVi('M');
+                                                _nbr_moutons++;
+                                                cout << "\033[36mUn Mouton vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 class Loup : public Vivant {
     public:
-    Loup(int row, int col, int rang){
+    Loup(int row, int col, int rang, int sexe){
         Vivant::pv_max = 10;
         Vivant::pv = pv_max;
         Vivant::faim_max = 5;
@@ -258,6 +297,7 @@ class Loup : public Vivant {
         Vivant::row = row;
         Vivant::col = col;
         Vivant::rang = rang;
+        Vivant::sexe = sexe;
         Vivant::type = 'L';
     }
     void deplacement(){
@@ -320,6 +360,51 @@ class Loup : public Vivant {
         }
         return 1;
     }
+    void ken(){
+        if (sexe == 0){
+            // on fait des bb
+            cout << "Je veux ken\n";
+            for (int i = row - 1; i <= row + 1; i++) {
+                for (int j = col - 1; j <= col + 1; j++) {
+                    if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
+                        // on fait des bb
+                        cout << "On veux ken\n";
+                        for (int i = row - 1; i <= row + 1; i++) {
+                            for (int j = col - 1; j <= col + 1; j++) {
+                                if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
+                                    cout << "On cherche ou accoucher\n";
+                                    // trouver une case vide pour le spawn du BB
+                                    for(int k=row-1 ; k<row+1; k++){
+                                        for(int a= col-1; a<col+1; a++){
+                                            for(int b= tab[i][j].getVivant()->getRow()-1; b<tab[i][j].getVivant()->getRow()+1; b++){
+                                                for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
+                                                    // On est sur la meme case
+                                                    if (k == b && a == o){
+                                                        cout << "Ca serait bien ici \n";
+                                                        // Est vide ?
+                                                        if (tab[k][a].getTypeVi() == ' '){
+                                                            // creer BB
+                                                            tabloup[_nbr_loups] = new Loup(k,a,_nbr_loups, rand()%2);
+                                                            tab[k][a].setVi(tabloup[_nbr_loups]);
+                                                            tab[k][a].setTypeVi('L');
+                                                            _nbr_loups++;
+
+                                                            cout << "\033[33mLoup 1["<< row << "][" << col << "]" << "Loup 2["<< tab[i][j].getVivant()->getRow() << "][" << tab[i][j].getVivant()->getCol() << "]" <<"Un loup vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
+                                                            return;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -381,6 +466,7 @@ int main(){
 ////////////////////////////////////////////////////////////////////////////////
 
 void genMouton(Mouton* tabmouton[NBR], int __nbr_moutons){
+    int leS;
     for(int m = 0; m < __nbr_moutons; m++) {
         // spawn aleatoire 
         int i = rand() % _row; 
@@ -391,7 +477,14 @@ void genMouton(Mouton* tabmouton[NBR], int __nbr_moutons){
             j = rand() % _col;
         }
         // setter de mouton
-        tabmouton[m] = new Mouton(i, j, m);
+        if (leS == 0){
+            tabmouton[m] = new Mouton(i, j, m, leS);
+            leS = 1;
+        }
+        else{
+            tabmouton[m] = new Mouton(i, j, m, leS);
+            leS = 0;
+        }
         // change se qu'il y a dans la case
         tab[i][j].setTypeVi(tabmouton[m]->getType());
         tab[i][j].setVi(tabmouton[m]);
@@ -400,6 +493,7 @@ void genMouton(Mouton* tabmouton[NBR], int __nbr_moutons){
 }
 
 void genLoup(Loup* tabloup[NBR], int _nbr_loups){
+    int leS;
     for(int l = 0; l < _nbr_loups; l++) {
         // spawn aleatoire 
         int i = rand() % _row; 
@@ -409,22 +503,27 @@ void genLoup(Loup* tabloup[NBR], int _nbr_loups){
             i = rand() % _row; 
             j = rand() % _col;
         }
-        // setter de mouton
-        tabloup[l] = new Loup(i, j, l);
+        // setter de Loup
+        if (leS == 0){
+            tabloup[l] = new Loup(i, j, l, leS);
+            leS = 1;
+        }
+        else{
+            tabloup[l] = new Loup(i, j, l, leS);
+            leS = 0;
+        }
         // change se qu'il y a dans la case
         tab[i][j].setTypeVi(tabloup[l]->getType());
         tab[i][j].setVi(tabloup[l]);
     }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
-
 
 void tourMouton(Mouton* moutons[NBR], int _nbr_moutons){
     int temp = 0;
     for(int a = 0; a < _nbr_moutons; a++) {
-        temp = rand() % 2;
+        temp = rand() % 3;
         if (moutons[a]->lavidaloca(tabMouton) == 0){
             continue;
         }
@@ -432,16 +531,19 @@ void tourMouton(Mouton* moutons[NBR], int _nbr_moutons){
             if(temp == 0) {
                 moutons[a]->deplacement();
             }
-            if (temp == 1){
+            else if (temp == 1){
                 moutons[a]->mangerHerbe();
             }
+            else if (temp == 2){
+                moutons[a]->ken();
+            }  
         }
     }
 }
 void tourLoup(Loup* loups[NBR], int _nbr_loups){
     int temp = 0;
     for(int a = 0; a < _nbr_loups; a++) {
-        temp = rand() % 2;
+        temp = rand() % 3;
         if (loups[a]->lavidaloca(loups) == 0){
             continue;
         }
@@ -449,8 +551,11 @@ void tourLoup(Loup* loups[NBR], int _nbr_loups){
             if(temp == 0) {
                 loups[a]->deplacement();
             }
-            if (temp == 1){
+            else if (temp == 1){
                 loups[a]->mangerMouton();
+            }
+            else if (temp == 2){
+                loups[a]->ken();
             }
         }
     }
