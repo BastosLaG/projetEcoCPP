@@ -283,7 +283,7 @@ class Herbe : public NonVivant {
     void diminuerQuantite(){
         if (quantite > 0)
         {
-            //quantie
+            quantite -- ;
         }
         if (quantite == 0)
         {
