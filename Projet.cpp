@@ -18,7 +18,7 @@
 static int _row;
 static int _col;
 static int _nbr_moutons = 20;
-static int _nbr_loups = 20;
+static int _nbr_loups = 10;
 
 // il nous faut un plateau de m*n cases avec de l'herbe sur chaque cases et le nbr des mouton et des loups sont parametrable par le joueur
 
@@ -115,9 +115,6 @@ class Vivant : public Case{
     int faim; // faim
     int sexe;
     char type;
-
-
-
     public:
     int getRow() {return row;}
     int getCol() {return col;}
@@ -138,7 +135,8 @@ class Vivant : public Case{
     void setType(char new_type) {type = new_type;}
 
 
-    void deplacement(int direction) {
+    void deplacement(int direction) {  
+        if (direction == -1) return;  
         int new_row = row;
         int new_col = col;
         if (direction == N){
@@ -189,6 +187,135 @@ class Vivant : public Case{
         }
     }
     virtual void ken() = 0;
+    // Recherche une proie 
+    int recherche(int distance, char chercher){
+        if (distance >= _row || distance >= _col) return -1;
+        int new_row_moins = getRow()-distance;
+        int new_row_plus = getRow()+distance;
+        int new_col_moins = getCol()-distance;
+        int new_col_plus = getCol()+distance;
+        while(new_row_moins < 0) new_row_moins++;
+        while(new_row_plus > _row) new_row_plus--; 
+        while(new_col_moins < 0) new_col_moins++;
+        while(new_col_plus > _col) new_col_plus--;
+        for (int i = new_row_moins; i < new_row_plus; i++)
+        {
+            for (int j = new_col_moins; j < new_col_plus; j++)
+            {
+                if (tab[i][j].getTypeVi() == chercher)
+                {
+                    if (i < getRow() && j < getCol()) return NO;
+                    else if (i < getRow() && j == getCol()) return N;
+                    else if (i < getRow() && j > getCol()) return NE;
+                    else if (i == getRow() && j < getCol()) return O;
+                    else if (i == getRow() && j > getCol()) return E;
+                    else if (i > getRow() && j < getCol()) return SO;
+                    else if (i > getRow() && j == getCol()) return S;
+                    else if (i > getRow() && j > getCol()) return SE;    
+                }
+                else if (tab[i][j].getTypeNvi() == chercher)
+                {
+                    if (i < getRow() && j < getCol()) return NO;
+                    else if (i < getRow() && j == getCol()) return N;
+                    else if (i < getRow() && j > getCol()) return NE;
+                    else if (i == getRow() && j < getCol()) return O;
+                    else if (i == getRow() && j > getCol()) return E;
+                    else if (i > getRow() && j < getCol()) return SO;
+                    else if (i > getRow() && j == getCol()) return S;
+                    else if (i > getRow() && j > getCol()) return SE;    
+                }
+            }
+        }
+        return recherche(distance+1, chercher);
+    }
+    // regarde s'il est a porter pour manger
+    int recherche(char chercher){
+        int new_row_moins = getRow()-1;
+        int new_row_plus = getRow()+1;
+        int new_col_moins = getCol()-1;
+        int new_col_plus = getCol()+1;
+        while(new_row_moins < 0) new_row_moins++;
+        while(new_row_plus > _row) new_row_plus--; 
+        while(new_col_moins < 0) new_col_moins++;
+        while(new_col_plus > _col) new_col_plus--;
+        for (int i = new_row_moins; i < new_row_plus; i++)
+        {
+            for (int j = new_col_moins; j < new_col_plus; j++)
+            {
+                if (tab[i][j].getTypeVi() == chercher)
+                {
+                    if (i < getRow() && j < getCol()) return 0;
+                    else if (i < getRow() && j == getCol()) return 0;
+                    else if (i < getRow() && j > getCol()) return 0;
+                    else if (i == getRow() && j < getCol()) return 0;
+                    else if (i == getRow() && j > getCol()) return 0;
+                    else if (i > getRow() && j < getCol()) return 0;
+                    else if (i > getRow() && j == getCol()) return 0;
+                    else if (i > getRow() && j > getCol()) return 0;     
+                }
+            }
+        }
+        return 1;
+    }
+    // regarde s'il est a porter pour s'accoupler
+    int recherche(char chercher, int sexe){
+        int new_row_moins = getRow()-1;
+        int new_row_plus = getRow()+1;
+        int new_col_moins = getCol()-1;
+        int new_col_plus = getCol()+1;
+        while(new_row_moins < 0) new_row_moins++;
+        while(new_row_plus > _row) new_row_plus--; 
+        while(new_col_moins < 0) new_col_moins++;
+        while(new_col_plus > _col) new_col_plus--;
+        for (int i = new_row_moins; i < new_row_plus; i++)
+        {
+            for (int j = new_col_moins; j < new_col_plus; j++)
+            {
+                if (tab[i][j].getTypeVi() == chercher && getSexe() == sexe)
+                {
+                    if (i < getRow() && j < getCol()) return 0;
+                    else if (i < getRow() && j == getCol()) return 0;
+                    else if (i < getRow() && j > getCol()) return 0;
+                    else if (i == getRow() && j < getCol()) return 0;
+                    else if (i == getRow() && j > getCol()) return 0;
+                    else if (i > getRow() && j < getCol()) return 0;
+                    else if (i > getRow() && j == getCol()) return 0;
+                    else if (i > getRow() && j > getCol()) return 0;     
+                }
+            }
+        }
+        return 1;
+    }
+    // recherche a se reproduire
+    int recherche(int distance, char chercher, int sexe){
+        if (distance >= _row || distance >= _col) return -1;
+        int new_row_moins = getRow()-distance;
+        int new_row_plus = getRow()+distance;
+        int new_col_moins = getCol()-distance;
+        int new_col_plus = getCol()+distance;
+        while(new_row_moins < 0) new_row_moins++;
+        while(new_row_plus > _row) new_row_plus--; 
+        while(new_col_moins < 0) new_col_moins++;
+        while(new_col_plus > _col) new_col_plus--;
+        for (int i = new_row_moins; i <= new_row_plus; i++)
+        {
+            for (int j = new_col_moins; j <= new_col_plus; j++)
+            {
+                if (tab[i][j].getTypeVi() == chercher && getSexe() == sexe)
+                {
+                    if (i < getRow() && j < getCol()) return NO;
+                    else if (i < getRow() && j == getCol()) return N;
+                    else if (i < getRow() && j > getCol()) return NE;
+                    else if (i == getRow() && j < getCol()) return O;
+                    else if (i == getRow() && j > getCol()) return E;
+                    else if (i > getRow() && j < getCol()) return SO;
+                    else if (i > getRow() && j == getCol()) return S;
+                    else if (i > getRow() && j > getCol()) return SE;     
+                }
+            }
+        }
+        return recherche(distance+1, chercher, sexe);
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +323,7 @@ class Vivant : public Case{
 class Mouton : public Vivant {
     public:
     Mouton(int row, int col, int rang, int sexe){
-        Vivant::pv_max = 10;
+        Vivant::pv_max = 50;
         Vivant::pv = pv_max;
         Vivant::faim_max = 5;
         Vivant::faim = 5;
@@ -207,8 +334,21 @@ class Mouton : public Vivant {
         Vivant::type = 'M';
     }
     void deplacement(){
-        int temp = rand() % 8;
-        Vivant::deplacement(temp);
+        if (getFaim() <= 2){
+            if (Vivant::recherche('H') == 0){
+                mangerHerbe();
+            }
+            // recherche de l'herbe
+            Vivant::deplacement(Vivant::recherche(1, 'H'));
+        }
+        else{
+            if (Vivant::recherche('M', (getSexe()+1)%1) == 0){
+                ken();
+            }
+            else{
+                Vivant::deplacement(Vivant::recherche(2, 'M', (getSexe()+1)%1));
+            }
+        }
     }
     void mangerHerbe() {
         if (tab[row][col].getTypeNvi() == 'H') {
@@ -290,10 +430,10 @@ class Mouton : public Vivant {
 class Loup : public Vivant {
     public:
     Loup(int row, int col, int rang, int sexe){
-        Vivant::pv_max = 10;
+        Vivant::pv_max = 60;
         Vivant::pv = pv_max;
-        Vivant::faim_max = 5;
-        Vivant::faim = 5;
+        Vivant::faim_max = 10;
+        Vivant::faim = 10;
         Vivant::row = row;
         Vivant::col = col;
         Vivant::rang = rang;
@@ -301,8 +441,26 @@ class Loup : public Vivant {
         Vivant::type = 'L';
     }
     void deplacement(){
-        int temp = rand() % 8;
-        Vivant::deplacement(temp);
+        if (getFaim() <= (int)getFaimMax()/2){
+            if (recherche('M'))
+            {
+                mangerMouton();   
+            }
+            else{
+                // recherche un mouton
+                Vivant::deplacement(Vivant::recherche(2, 'M'));
+            }
+        }
+        else{
+            if (Vivant::recherche('L', (getSexe()+1)%1))
+            {
+                ken();
+            }
+            else{
+                Vivant::deplacement(Vivant::recherche(2, 'L', (getSexe()+1)%1));
+            }
+        }
+        
     }
     void mangerMouton() {
         for (int i = row - 1; i <= row + 1; i++) {
@@ -363,16 +521,13 @@ class Loup : public Vivant {
     void ken(){
         if (sexe == 0){
             // on fait des bb
-            cout << "Je veux ken\n";
             for (int i = row - 1; i <= row + 1; i++) {
                 for (int j = col - 1; j <= col + 1; j++) {
                     if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
                         // on fait des bb
-                        cout << "On veux ken\n";
                         for (int i = row - 1; i <= row + 1; i++) {
                             for (int j = col - 1; j <= col + 1; j++) {
                                 if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
-                                    cout << "On cherche ou accoucher\n";
                                     // trouver une case vide pour le spawn du BB
                                     for(int k=row-1 ; k<row+1; k++){
                                         for(int a= col-1; a<col+1; a++){
@@ -380,7 +535,6 @@ class Loup : public Vivant {
                                                 for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
                                                     // On est sur la meme case
                                                     if (k == b && a == o){
-                                                        cout << "Ca serait bien ici \n";
                                                         // Est vide ?
                                                         if (tab[k][a].getTypeVi() == ' '){
                                                             // creer BB
@@ -388,7 +542,6 @@ class Loup : public Vivant {
                                                             tab[k][a].setVi(tabloup[_nbr_loups]);
                                                             tab[k][a].setTypeVi('L');
                                                             _nbr_loups++;
-
                                                             cout << "\033[33mLoup 1["<< row << "][" << col << "]" << "Loup 2["<< tab[i][j].getVivant()->getRow() << "][" << tab[i][j].getVivant()->getCol() << "]" <<"Un loup vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
                                                             return;
                                                         }
@@ -455,7 +608,7 @@ int main(){
         tourLoup(tabloup, _nbr_loups);
         nbr_tours++; 
         print_plateau(nbr_tours, _nbr_moutons, _nbr_loups);
-        if (_nbr_loups == 0 && _nbr_moutons == 0){
+        if (_nbr_loups <= 0 && _nbr_moutons <= 0){
             game = false;
         }
         
@@ -465,9 +618,9 @@ int main(){
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void genMouton(Mouton* tabmouton[NBR], int __nbr_moutons){
+void genMouton(Mouton* tabmouton[NBR], int _nbr_moutons){
     int leS;
-    for(int m = 0; m < __nbr_moutons; m++) {
+    for(int m = 0; m < _nbr_moutons; m++) {
         // spawn aleatoire 
         int i = rand() % _row; 
         int j = rand() % _col;
@@ -521,42 +674,24 @@ void genLoup(Loup* tabloup[NBR], int _nbr_loups){
 ////////////////////////////////////////////////////////////////////////////////
 
 void tourMouton(Mouton* moutons[NBR], int _nbr_moutons){
-    int temp = 0;
     for(int a = 0; a < _nbr_moutons; a++) {
-        temp = rand() % 3;
-        if (moutons[a]->lavidaloca(tabMouton) == 0){
+        cout << "Mouton " << a << " \n";
+        if (moutons[a]->lavidaloca(moutons) == 0){
             continue;
         }
         else{
-            if(temp == 0) {
-                moutons[a]->deplacement();
-            }
-            else if (temp == 1){
-                moutons[a]->mangerHerbe();
-            }
-            else if (temp == 2){
-                moutons[a]->ken();
-            }  
+            moutons[a]->deplacement();
         }
     }
 }
 void tourLoup(Loup* loups[NBR], int _nbr_loups){
-    int temp = 0;
     for(int a = 0; a < _nbr_loups; a++) {
-        temp = rand() % 3;
+        cout << "Loup " << a << " \n";
         if (loups[a]->lavidaloca(loups) == 0){
             continue;
         }
         else{
-            if(temp == 0) {
-                loups[a]->deplacement();
-            }
-            else if (temp == 1){
-                loups[a]->mangerMouton();
-            }
-            else if (temp == 2){
-                loups[a]->ken();
-            }
+            loups[a]->deplacement();
         }
     }
 }
@@ -597,10 +732,22 @@ void print_plateau(int nbr_tours, int __nbr_moutons, int _nbr_loups){
             }
             else if(i%2 == 0){
                 if ( tab[j][temp].getTypeVi() == 'M'){
-                    cout << "\033[0m" << tab[j][temp].getTypeVi() << "\033[0m";
+                    if (tab[j][temp].getVivant()->getSexe() == 0)
+                    {
+                        cout << "\033[37m" << tab[j][temp].getTypeVi() << "\033[0m";
+                    }
+                    else{
+                        cout << "\033[90m" << tab[j][temp].getTypeVi() << "\033[0m";
+                    }
                 }
                 else if ( tab[j][temp].getTypeVi() == 'L'){
-                    cout << "\033[31m" << tab[j][temp].getTypeVi() << "\033[0m";
+                    if (tab[j][temp].getVivant()->getSexe() == 0)
+                    {
+                        cout << "\033[31m" << tab[j][temp].getTypeVi() << "\033[0m";
+                    }
+                    else{
+                        cout << "\033[33m" << tab[j][temp].getTypeVi() << "\033[0m";
+                    }
                 }
                 else if ( tab[j][temp].getTypeVi() == ' '){
                     cout << ' ';
