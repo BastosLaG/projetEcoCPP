@@ -187,6 +187,10 @@ class Vivant : public Case{
         }
     }
     virtual void ken() = 0;
+
+
+
+
     // Recherche une proie 
     int recherche(int distance, char chercher){
         if (distance >= _row || distance >= _col) return -1;
@@ -228,6 +232,10 @@ class Vivant : public Case{
         }
         return recherche(distance+1, chercher);
     }
+
+
+
+
     // regarde s'il est a porter pour manger
     int recherche(char chercher){
         int new_row_moins = getRow()-1;
@@ -253,10 +261,26 @@ class Vivant : public Case{
                     else if (i > getRow() && j == getCol()) return 0;
                     else if (i > getRow() && j > getCol()) return 0;     
                 }
+                if (tab[i][j].getTypeNvi() == chercher)
+                {
+                    if (i < getRow() && j < getCol()) return 0;
+                    else if (i < getRow() && j == getCol()) return 0;
+                    else if (i < getRow() && j > getCol()) return 0;
+                    else if (i == getRow() && j < getCol()) return 0;
+                    else if (i == getRow() && j == getCol()) return 0;
+                    else if (i == getRow() && j > getCol()) return 0;
+                    else if (i > getRow() && j < getCol()) return 0;
+                    else if (i > getRow() && j == getCol()) return 0;
+                    else if (i > getRow() && j > getCol()) return 0;     
+                }
             }
         }
         return 1;
     }
+
+
+
+
     // regarde s'il est a porter pour s'accoupler
     int recherche(char chercher, int sexe){
         int new_row_moins = getRow()-1;
@@ -271,7 +295,7 @@ class Vivant : public Case{
         {
             for (int j = new_col_moins; j < new_col_plus; j++)
             {
-                if (tab[i][j].getTypeVi() == chercher && getSexe() == sexe)
+                if (tab[i][j].getTypeVi() == chercher && getSexe() != sexe)
                 {
                     if (i < getRow() && j < getCol()) return 0;
                     else if (i < getRow() && j == getCol()) return 0;
@@ -286,6 +310,10 @@ class Vivant : public Case{
         }
         return 1;
     }
+    
+    
+    
+    
     // recherche a se reproduire
     int recherche(int distance, char chercher, int sexe){
         if (distance >= _row || distance >= _col) return -1;
@@ -301,7 +329,7 @@ class Vivant : public Case{
         {
             for (int j = new_col_moins; j <= new_col_plus; j++)
             {
-                if (tab[i][j].getTypeVi() == chercher && getSexe() == sexe)
+                if (tab[i][j].getTypeVi() == chercher && getSexe() != sexe)
                 {
                     if (i < getRow() && j < getCol()) return NO;
                     else if (i < getRow() && j == getCol()) return N;
@@ -338,15 +366,17 @@ class Mouton : public Vivant {
             if (Vivant::recherche('H') == 0){
                 mangerHerbe();
             }
-            // recherche de l'herbe
-            Vivant::deplacement(Vivant::recherche(1, 'H'));
+            else if (Vivant::recherche('H') == 1){
+                // recherche de l'herbe
+                Vivant::deplacement(Vivant::recherche(1, 'H'));
+            }
         }
         else{
-            if (Vivant::recherche('M', (getSexe()+1)%1) == 0){
+            if (Vivant::recherche('M', (getSexe()+1)%2) == 0){
                 ken();
             }
             else{
-                Vivant::deplacement(Vivant::recherche(2, 'M', (getSexe()+1)%1));
+                Vivant::deplacement(Vivant::recherche(2, 'M', (getSexe()+1)%2));
             }
         }
     }
@@ -391,28 +421,26 @@ class Mouton : public Vivant {
         return 1;
     }
     void ken(){
-        if (sexe == 0){
-            // on fait des bb
-            for (int i = row - 1; i <= row + 1; i++) {
-                for (int j = col - 1; j <= col + 1; j++) {
-                    if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
-                        // Le loup a trouver son ame soeur
-                        for(int k=row-1 ; k<row+1; k++){
-                            for(int a= col-1; a<col+1; a++){
-                                for(int b= tab[i][j].getVivant()->getRow()-1; b<tab[i][j].getVivant()->getRow()+1; b++){
-                                    for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
-                                        // On est sur la meme case
-                                        if (k == b && a == o){
-                                            // Est vide ?
-                                            if (tab[k][a].getTypeVi() == ' '){
-                                                // creer BB
-                                                tabMouton[_nbr_moutons] = new Mouton(k,a,_nbr_moutons, rand()%2);
-                                                tab[k][a].setVi(tabMouton[_nbr_moutons]);
-                                                tab[k][a].setTypeVi('M');
-                                                _nbr_moutons++;
-                                                cout << "\033[36mUn Mouton vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
-                                                return;
-                                            }
+        // on fait des bb
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
+                    // Le loup a trouver son ame soeur
+                    for(int k=row-1 ; k<row+1; k++){
+                        for(int a= col-1; a<col+1; a++){
+                            for(int b= tab[i][j].getVivant()->getRow()-1; b<tab[i][j].getVivant()->getRow()+1; b++){
+                                for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
+                                    // On est sur la meme case
+                                    if (k == b && a == o){
+                                        // Est vide ?
+                                        if (tab[k][a].getTypeVi() == ' '){
+                                            // creer BB
+                                            tabMouton[_nbr_moutons] = new Mouton(k,a,_nbr_moutons, rand()%2);
+                                            tab[k][a].setVi(tabMouton[_nbr_moutons]);
+                                            tab[k][a].setTypeVi('M');
+                                            _nbr_moutons++;
+                                            cout << "\033[36mUn Mouton vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
+                                            return;
                                         }
                                     }
                                 }
@@ -441,8 +469,8 @@ class Loup : public Vivant {
         Vivant::type = 'L';
     }
     void deplacement(){
-        if (getFaim() <= (int)getFaimMax()/2){
-            if (recherche('M'))
+        if (getFaim() < 4){
+            if (recherche('M') == 0)
             {
                 mangerMouton();   
             }
@@ -452,12 +480,12 @@ class Loup : public Vivant {
             }
         }
         else{
-            if (Vivant::recherche('L', (getSexe()+1)%1))
+            if (Vivant::recherche('L', (getSexe()+1)%2) == 0)
             {
                 ken();
             }
             else{
-                Vivant::deplacement(Vivant::recherche(2, 'L', (getSexe()+1)%1));
+                Vivant::deplacement(Vivant::recherche(2, 'L', (getSexe()+1)%2));
             }
         }
         
@@ -519,32 +547,30 @@ class Loup : public Vivant {
         return 1;
     }
     void ken(){
-        if (sexe == 0){
-            // on fait des bb
-            for (int i = row - 1; i <= row + 1; i++) {
-                for (int j = col - 1; j <= col + 1; j++) {
-                    if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
-                        // on fait des bb
-                        for (int i = row - 1; i <= row + 1; i++) {
-                            for (int j = col - 1; j <= col + 1; j++) {
-                                if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
-                                    // trouver une case vide pour le spawn du BB
-                                    for(int k=row-1 ; k<row+1; k++){
-                                        for(int a= col-1; a<col+1; a++){
-                                            for(int b= tab[i][j].getVivant()->getRow()-1; b<tab[i][j].getVivant()->getRow()+1; b++){
-                                                for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
-                                                    // On est sur la meme case
-                                                    if (k == b && a == o){
-                                                        // Est vide ?
-                                                        if (tab[k][a].getTypeVi() == ' '){
-                                                            // creer BB
-                                                            tabloup[_nbr_loups] = new Loup(k,a,_nbr_loups, rand()%2);
-                                                            tab[k][a].setVi(tabloup[_nbr_loups]);
-                                                            tab[k][a].setTypeVi('L');
-                                                            _nbr_loups++;
-                                                            cout << "\033[33mLoup 1["<< row << "][" << col << "]" << "Loup 2["<< tab[i][j].getVivant()->getRow() << "][" << tab[i][j].getVivant()->getCol() << "]" <<"Un loup vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
-                                                            return;
-                                                        }
+        // on fait des bb
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
+                    // on fait des bb
+                    for (int i = row - 1; i <= row + 1; i++) {
+                        for (int j = col - 1; j <= col + 1; j++) {
+                            if (i >= 0 && i < _row && j >= 0 && j < _col && tab[i][j].getTypeVi() == getType() && tab[i][j].getVivant()->getSexe() != getSexe()){
+                                // trouver une case vide pour le spawn du BB
+                                for(int k=row-1 ; k<row+1; k++){
+                                    for(int a= col-1; a<col+1; a++){
+                                        for(int b= tab[i][j].getVivant()->getRow()-1; b<tab[i][j].getVivant()->getRow()+1; b++){
+                                            for (int o = tab[i][j].getVivant()->getCol()-1; o < tab[i][j].getVivant()->getCol()+1; o++){
+                                                // On est sur la meme case
+                                                if (k == b && a == o){
+                                                    // Est vide ?
+                                                    if (tab[k][a].getTypeVi() == ' '){
+                                                        // creer BB
+                                                        tabloup[_nbr_loups] = new Loup(k,a,_nbr_loups, rand()%2);
+                                                        tab[k][a].setVi(tabloup[_nbr_loups]);
+                                                        tab[k][a].setTypeVi('L');
+                                                        _nbr_loups++;
+                                                        cout << "\033[33mLoup 1["<< row << "][" << col << "]" << "Loup 2["<< tab[i][j].getVivant()->getRow() << "][" << tab[i][j].getVivant()->getCol() << "]" <<"Un loup vient de naître [" << k << "][" << a << "]" << "\033[0m" << endl;
+                                                        return;
                                                     }
                                                 }
                                             }
@@ -604,8 +630,8 @@ int main(){
             }
         }
         
-        tourMouton(tabMouton, _nbr_moutons);
         tourLoup(tabloup, _nbr_loups);
+        tourMouton(tabMouton, _nbr_moutons);
         nbr_tours++; 
         print_plateau(nbr_tours, _nbr_moutons, _nbr_loups);
         if (_nbr_loups <= 0 && _nbr_moutons <= 0){
@@ -675,7 +701,7 @@ void genLoup(Loup* tabloup[NBR], int _nbr_loups){
 
 void tourMouton(Mouton* moutons[NBR], int _nbr_moutons){
     for(int a = 0; a < _nbr_moutons; a++) {
-        cout << "Mouton " << a << " \n";
+        cout << "Mouton " << a << " [" << moutons[a]->getRow() << "][" << moutons[a]->getCol() << "]\n";
         if (moutons[a]->lavidaloca(moutons) == 0){
             continue;
         }
@@ -686,7 +712,7 @@ void tourMouton(Mouton* moutons[NBR], int _nbr_moutons){
 }
 void tourLoup(Loup* loups[NBR], int _nbr_loups){
     for(int a = 0; a < _nbr_loups; a++) {
-        cout << "Loup " << a << " \n";
+        cout << "Loup " << a << " [" << loups[a]->getRow() << "][" << loups[a]->getCol() << "]\n";
         if (loups[a]->lavidaloca(loups) == 0){
             continue;
         }
